@@ -36,7 +36,71 @@ async function run() {
 
 
         const userCollection = client.db("Blood-Doners").collection("users")
+
+
         // Users Related API
+
+        app.get('/users/admin/:email', async (req, res) => {
+            const email = req.params.email;
+
+            const query = { email: email };
+            const user = await userCollection.findOne(query);
+            let admin = false;
+            if (user) {
+                admin = user?.role === 'admin';
+            }
+            res.send({ admin });
+        })
+
+        app.patch('/make-admin/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    userRole: 'admin'
+                }
+            }
+            const result = await userCollection.updateOne(filter, updatedDoc);
+            res.send(result)
+        })
+
+        app.patch('/make-volunteer/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    userRole: 'volunteer'
+                }
+            }
+            const result = await userCollection.updateOne(filter, updatedDoc);
+            res.send(result)
+        })
+
+
+        app.patch('/block/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    status: 'blocked'
+                }
+            }
+            const result = await userCollection.updateOne(filter, updatedDoc);
+            res.send(result)
+        })
+
+
+        app.patch('/unblock/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    status: 'active'
+                }
+            }
+            const result = await userCollection.updateOne(filter, updatedDoc);
+            res.send(result)
+        })
 
         app.get('/all-users', async (req, res) => {
             const result = await userCollection.find().toArray();
