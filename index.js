@@ -36,6 +36,7 @@ async function run() {
 
 
         const userCollection = client.db("Blood-Doners").collection("users")
+        const requestCollection = client.db("Blood-Doners").collection("requests")
 
 
         // Users Related API
@@ -121,6 +122,56 @@ async function run() {
             const result = await userCollection.findOne(query)
             res.send(result)
         })
+
+        // Blood Request API 
+        app.post('/request', async (req, res) => {
+            const request = req.body;
+            const result = await requestCollection.insertOne(request);
+            res.send(result);
+        })
+
+        //Getting all requests 
+        app.get('/all-requests', async (req, res) => {
+            const result = await requestCollection.find().toArray();
+            res.send(result)
+        })
+
+        //Getting the requests by user
+        app.get('/donor-requests', async (req, res) => {
+            let query = {};
+            if (req?.query?.email) {
+                query = { requesterEmail: req.query.email };
+            }
+            const result = await requestCollection.find(query).toArray();
+            res.send(result)
+        })
+
+        //Inprogress request status
+        app.patch('/inprogress/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const options = { upsert: true };
+            const updatedDoc = req.body;
+
+            const updateRequest = {
+                $set: {
+                    donorEmail: updatedDoc.donorEmail,
+                    donorName: updatedDoc.donorName,
+                    status: updatedDoc.status
+                }
+            }
+            const result = await requestCollection.updateOne(filter, updateRequest, options);
+            res.send(result)
+        })
+
+
+        app.get('/all-requests/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await requestCollection.findOne(query);
+            res.send(result);
+        })
+
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
