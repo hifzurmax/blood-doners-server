@@ -172,6 +172,65 @@ async function run() {
             res.send(result);
         })
 
+        // Request status done
+        app.patch('/done/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    status: 'Done'
+                }
+            }
+            const result = await requestCollection.updateOne(filter, updatedDoc);
+            res.send(result)
+        })
+
+        // Request status Canceled
+        app.patch('/cancel/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    status: 'Canceled'
+                }
+            }
+            const result = await requestCollection.updateOne(filter, updatedDoc);
+            res.send(result)
+        })
+
+        // Request Delete
+        app.delete('/requets/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await requestCollection.deleteOne(query);
+            res.send(result);
+        })
+
+        // Request Update
+        app.patch('/update-request/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const updateRequest = req.body;
+
+            const request = {
+                $set: {
+                    requesterEmail: updateRequest.requesterEmail,
+                    requesterName: updateRequest.requesterName,
+                    recipientName: updateRequest.recipientName,
+                    bloodGroup: updateRequest.bloodGroup,
+                    district: updateRequest.district,
+                    upazila: updateRequest.upazila,
+                    hospitalName: updateRequest.hospitalName,
+                    fullAddress: updateRequest.fullAddress,
+                    donationDate: updateRequest.donationDate,
+                    donationTime: updateRequest.donationTime,
+                    requestMessage: updateRequest.requestMessage
+                }
+            }
+            const result = await requestCollection.updateOne(filter, request);
+            res.send(result)
+        })
+
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
